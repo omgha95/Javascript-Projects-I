@@ -1,15 +1,23 @@
 let currentPlayer = "X";
-const NUMBER_OF_ROWS = 3;
+const NUMBER_OF_ROWS = 4;
 const turns = NUMBER_OF_ROWS ** 2;
 let turnCounter = 0;
 
-let board = [
-  ["_", "_", "_"],
-  ["_", "_", "_"],
-  ["_", "_", "_"],
-];
+const createBoardArray = () => {
+  let board = [];
+
+  for (let row = 0; row < NUMBER_OF_ROWS; row++) {
+    board.push(Array.from({ length: NUMBER_OF_ROWS }, () => "_"));
+  }
+  return board;
+};
+
+let board = createBoardArray();
 
 const resetButton = document.getElementById("reset");
+resetButton.onkeydown = (event) => {
+  event.key === "Enter" ? resetBoard() : true;
+};
 
 const getCellPlacement = (index, numOfRows) => {
   const row = Math.floor(index / numOfRows);
@@ -95,11 +103,7 @@ const resetBoard = () => {
   document.querySelector(".board").remove();
   createBoard();
 
-  board = [
-    ["_", "_", "_"],
-    ["_", "_", "_"],
-    ["_", "_", "_"],
-  ];
+  board = createBoardArray();
 
   currentPlayer = "X";
   turnCounter = 0;
@@ -143,6 +147,24 @@ const cellClickHandler = (event, index) => {
   }
 };
 
+const createCell = (index) => {
+  const cellElementString = `<div class="cell" role="button" tabindex="${
+    index + 1
+  }"><span class="value"></span></div>`;
+  const cellElement = document
+    .createRange()
+    .createContextualFragment(cellElementString);
+
+  cellElement.querySelector(".cell").onclick = (event) => {
+    cellClickHandler(event, index);
+  };
+  cellElement.querySelector(".cell").onkeydown = (event) => {
+    event.key === "Enter" ? cellClickHandler(event, index) : true;
+  };
+
+  return cellElement;
+};
+
 const createBoard = () => {
   const container = document.querySelector(".container");
   const board = document.createElement("div");
@@ -150,14 +172,8 @@ const createBoard = () => {
   board.classList.add("board");
 
   for (let i = 0; i < NUMBER_OF_ROWS ** 2; i++) {
-    const cellElementString = `<div class="cell"><span class="value"></span></div>`;
-    const cellElement = document
-      .createRange()
-      .createContextualFragment(cellElementString);
+    const cellElement = createCell(i);
 
-    cellElement.querySelector(".cell").onclick = (event) => {
-      cellClickHandler(event, i);
-    };
     board.appendChild(cellElement);
     document.documentElement.style.setProperty("--grid-rows", NUMBER_OF_ROWS);
   }
